@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prakiraan Cuaca</title>
+</head>
+<body>
+    
+    <h1 id="judul"></h1>
+
+    <ul id="data"></ul>
+    
+    <script>
+        fetch("https://data.bmkg.go.id/DataMKG/MEWS/DigitalForecast/DigitalForecast-JawaTimur.xml").then(response => {
+            return response.text();
+        }).then(XMLString => {
+            const XMLDoc = new DOMParser().parseFromString(XMLString, "text/xml");
+
+            const surabayaElement = XMLDoc.querySelector('area[description="Surabaya"]'); 
+            const surabayaName= surabayaElement.getAttribute('description');
+
+           // console.log(surabayaName);
+
+            document.getElementById('judul').innerHTML = 'Data Prakiraan Cuaca ' + surabayaName;
+
+            const weatherParameters = surabayaElement.querySelector('parameter[description="Weather"]');
+
+            const weatherData = weatherParameters.querySelectorAll('timerange');
+
+            function formatDate(Date) {
+                    const year = Date.substr(0,4);
+                    const month = Date.substr(4,2);
+                    const day = Date.substr(6,2);
+
+                    return year + '/' + month + '/' + day;
+                }
+
+                function formatTime(Time) {
+                    const hour = Time.substr(0,2);
+                    const minute = Time.substr(2,2);
+
+                    return hour + ':' + minute;
+                }
+
+            function weatherCodeToText(code) {
+                switch (code) {
+                    case '0':
+                        return 'Clear Skies'
+                        break;
+
+                    case '1':
+                        return 'Partly Cloudy'
+                        break;
+
+                    case '2':
+                        return 'Partly Cloudy'
+                        break;
+
+                    case '3':
+                        return 'Mostly Cloudy'
+                        break;
+
+                    case '4':
+                        return 'Overcast'
+                        break;
+
+                    case '5':
+                        return 'Haze'
+                        break;
+
+                    case '10':
+                        return 'Smoke'
+                        break;
+
+                    case '45':
+                        return 'Fog'
+                        break;
+
+                    case '60':
+                        return 'Light Rain'
+                        break;
+
+                    case '61':
+                        return 'Rain'
+                        break;
+
+                    case '63':
+                        return 'Heavy Rain'
+                        break;
+
+                    case '80':
+                        return 'Isolated Shower'
+                        break;
+
+                    case '95':
+                        return 'Severe Thunderstorm'
+                        break;
+
+                    case '97':
+                        return 'Severe Thunderstorm'
+                        break;
+                }
+            }
+
+            for(const weather of weatherData) {
+
+                const dateAndTime = weather.getAttribute('datetime');
+                const Date = dateAndTime.substr(0,8);
+                const Time = dateAndTime.substr(8, 4);
+
+                const formattedDate = formatDate(Date);
+                const formattedTime = formatTime(Time);
+                const weatherValue = weather.querySelector('value');
+
+                const weatherCode = weatherCodeToText(weatherValue.textContent);
+
+                
+
+                console.log(formattedDate);
+                console.log(formattedTime);
+                console.log(weatherCode);
+
+                const List = document.createElement('li');
+                List.innerHTML = `
+                <p>Date: ${formattedDate}</p>
+                <p>Time: ${formattedTime}</p>
+                <p>Weather: ${weatherCode}</p>
+                `;
+
+                document.getElementById('data').appendChild(List);
+            }
+
+        });
+    </script>
+</body>
+</html>
